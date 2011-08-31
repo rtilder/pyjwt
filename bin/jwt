@@ -49,9 +49,19 @@ The exp key is special and can take an offset to current Unix time.
                 token = sys.stdin.read()
             else:
                 token = arguments[0]
+            while token.endswith("\n"):
+                token = token[0:len(token)-1]
             valid_jwt = jwt.header(token)
             if valid_jwt:
                 try:
+                    if options.algorithm.startswith("RS") or "alg" in valid_jwt and valid_jwt["alg"].startswith("RS"):
+                        if not options.key:
+                            if options.verify is not False:
+                                print "Key is required for RSA decoding unless --no-verify is specified"
+                                sys.exit(1)
+                        else:
+                            options.key = jwt.rsa_load(options.key)
+
                     print json.dumps(jwt.decode(token, key=options.key, verify=options.verify))
                     sys.exit(0)
                 except jwt.DecodeError, e:
@@ -64,33 +74,43 @@ The exp key is special and can take an offset to current Unix time.
         if options.key is None:
             print "Key is required when encoding. See --help for usage."
             sys.exit(1)
-        
+        if options.algorithm.startswith("RS"):
+            options.key = jwt.rsa_load(options.key)
+
         # Build payload object to encode
-        payload = {}
-        for arg in arguments:
+        if not sys.stdin.isatty():
             try:
-                k,v = arg.split('=', 1)
-                # exp +offset special case?
-                if k == 'exp' and v[0] == '+' and len(v) > 1:
-                    v = str(int(time.time()+int(v[1:])))
-                # Cast to integer?
-                if v.isdigit():
-                    v = int(v)
-                else:
-                    # Cast to float?
-                    try:
-                        v = float(v)
-                    except ValueError:
-                        pass
-                # Cast to true, false, or null?
-                constants = {'true': True, 'false': False, 'null': None}
-                if v in constants:
-                    v = constants[v]
-                payload[k] = v
-            except ValueError:
-                print "Invalid encoding input at %s" % arg
+                payload = token
+                payload = json.loads(payload)
+            except ValueError, ve:
+                print "Input stream is not a valid JSON object"
                 sys.exit(1)
-        
+        else:
+            payload = {}
+            for arg in arguments:
+                try:
+                    k,v = arg.split('=', 1)
+                    # exp +offset special case?
+                    if k == 'exp' and v[0] == '+' and len(v) > 1:
+                        v = str(int(time.time()+int(v[1:])))
+                    # Cast to integer?
+                    if v.isdigit():
+                        v = int(v)
+                    else:
+                        # Cast to float?
+                        try:
+                            v = float(v)
+                        except ValueError:
+                            pass
+                    # Cast to true, false, or null?
+                    constants = {'true': True, 'false': False, 'null': None}
+                    if v in constants:
+                        v = constants[v]
+                    payload[k] = v
+                except ValueError:
+                    print "Invalid encoding input at %s" % arg
+                    sys.exit(1)
+            
         try:
             print jwt.encode(payload, key=options.key, algorithm=options.algorithm)
             sys.exit(0)

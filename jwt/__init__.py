@@ -6,21 +6,35 @@ http://self-issued.info/docs/draft-jones-json-web-token-01.html
 import base64
 import hashlib
 import hmac
+import M2Crypto
 
 try:
     import json
 except ImportError:
     import simplejson as json
     
-__all__ = ['encode', 'decode', 'DecodeError']
+__all__ = ['encode', 'decode', 'rsa_load', 'check', 'DecodeError']
 
 class DecodeError(Exception): pass
 
 signing_methods = {
-    'HS256': lambda msg, key: hmac.new(key, msg, hashlib.sha256).digest(),
-    'HS384': lambda msg, key: hmac.new(key, msg, hashlib.sha384).digest(),
-    'HS512': lambda msg, key: hmac.new(key, msg, hashlib.sha512).digest(),
+    'HS256': lambda msg, key: hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha256).digest(),
+    'HS384': lambda msg, key: hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha384).digest(),
+    'HS512': lambda msg, key: hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha512).digest(),
+    'RS256': lambda msg, key: key.sign(hashlib.sha256(msg).digest(), 'sha256'),
+    'RS384': lambda msg, key: key.sign(hashlib.sha384(msg).digest(), 'sha384'),
+    'RS512': lambda msg, key: key.sign(hashlib.sha512(msg).digest(), 'sha512'),
 }
+
+verifying_methods = {
+    'HS256': lambda msg, key, sig: sig == hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha256).digest(),
+    'HS384': lambda msg, key, sig: sig == hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha384).digest(),
+    'HS512': lambda msg, key, sig: sig == hmac.new(unicode(key).encode('utf8'), msg, hashlib.sha512).digest(),
+    'RS256': lambda msg, key, sig: key.verify(hashlib.sha256(msg).digest(), sig, 'sha256'),
+    'RS384': lambda msg, key, sig: key.verify(hashlib.sha384(msg).digest(), sig, 'sha384'),
+    'RS512': lambda msg, key, sig: key.verify(hashlib.sha512(msg).digest(), sig, 'sha512')
+}
+
 
 def base64url_decode(input):
     input += '=' * (4 - (len(input) % 4))
@@ -43,8 +57,7 @@ def encode(payload, key, algorithm='HS256'):
     segments.append(base64url_encode(json.dumps(payload)))
     signing_input = '.'.join(segments)
     try:
-        ascii_key = unicode(key).encode('utf8')
-        signature = signing_methods[algorithm](signing_input, ascii_key)
+        signature = signing_methods[algorithm](signing_input, key)
     except KeyError:
         raise NotImplementedError("Algorithm not supported")
     segments.append(base64url_encode(signature))
@@ -64,9 +77,19 @@ def decode(jwt, key='', verify=True):
         raise DecodeError("Invalid segment encoding")
     if verify:
         try:
-            ascii_key = unicode(key).encode('utf8')
-            if not signature == signing_methods[header['alg']](signing_input, ascii_key):
+            if not verifying_methods[header['alg']](signing_input, key, signature):
                 raise DecodeError("Signature verification failed")
         except KeyError:
             raise DecodeError("Algorithm not supported")
     return payload
+
+def check(jwt, key=''):
+    try:
+        decode(jwt, key, True)
+        return True
+    except:
+        return False
+
+def rsa_load(filename):
+    """Read a PEM-encoded RSA key pair from a file."""
+    return M2Crypto.RSA.load_key(filename, M2Crypto.util.no_passphrase_callback)
