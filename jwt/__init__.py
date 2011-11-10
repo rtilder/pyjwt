@@ -93,3 +93,7 @@ def check(jwt, key=''):
 def rsa_load(filename):
     """Read a PEM-encoded RSA key pair from a file."""
     return M2Crypto.RSA.load_key(filename, M2Crypto.util.no_passphrase_callback)
+
+def rsa_load_pub(filename):
+    """Read a PEM-encoded RSA pubkey from a file."""
+    return M2Crypto.RSA.load_pub_key(filename)
