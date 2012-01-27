@@ -34,7 +34,13 @@ class TestJWT(unittest.TestCase):
         jwt_message = jwt.encode(self.payload, right_secret)
         decoded_payload = jwt.decode(jwt_message, verify=False)
         self.assertEqual(decoded_payload, self.payload)
-    
+
+    def test_bad_segments(self):
+        secret = 'secret'
+        jwt_message = jwt.encode(self.payload, secret) + 'garbage'
+        self.assertRaises(jwt.DecodeError,
+                          jwt.decode, jwt_message, key=secret)
+
     def test_no_secret(self):
         right_secret = 'foo'
         bad_secret = 'bar'

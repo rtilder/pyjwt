@@ -6,6 +6,7 @@ http://self-issued.info/docs/draft-jones-json-web-token-01.html
 import base64
 import hashlib
 import hmac
+import logging
 import M2Crypto
 
 try:
@@ -14,6 +15,8 @@ except ImportError:
     import simplejson as json
     
 __all__ = ['encode', 'decode', 'rsa_load', 'check', 'DecodeError']
+
+log = logging.getLogger(__name__)
 
 class DecodeError(Exception): pass
 
@@ -74,6 +77,8 @@ def decode(jwt, key='', verify=True):
         payload = json.loads(base64url_decode(payload_segment))
         signature = base64url_decode(crypto_segment)
     except (ValueError, TypeError):
+        # Log the actual exception so you know what's going on.
+        log.debug('Could not decode a segment', exc_info=True)
         raise DecodeError("Invalid segment encoding")
     if verify:
         try:
