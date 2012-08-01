@@ -27,6 +27,7 @@ signing_methods = {
     'RS256': lambda msg, key: key.sign(hashlib.sha256(msg).digest(), 'sha256'),
     'RS384': lambda msg, key: key.sign(hashlib.sha384(msg).digest(), 'sha384'),
     'RS512': lambda msg, key: key.sign(hashlib.sha512(msg).digest(), 'sha512'),
+    'none': lambda msg, key: '',
 }
 
 verifying_methods = {
@@ -35,7 +36,8 @@ verifying_methods = {
     'HS512': lambda msg, key, sig: sig == hmac.new(key, msg, hashlib.sha512).digest(),
     'RS256': lambda msg, key, sig: key.verify(hashlib.sha256(msg).digest(), sig, 'sha256'),
     'RS384': lambda msg, key, sig: key.verify(hashlib.sha384(msg).digest(), sig, 'sha384'),
-    'RS512': lambda msg, key, sig: key.verify(hashlib.sha512(msg).digest(), sig, 'sha512')
+    'RS512': lambda msg, key, sig: key.verify(hashlib.sha512(msg).digest(), sig, 'sha512'),
+    'none': lambda msg, key, sig: True
 }
 
 
