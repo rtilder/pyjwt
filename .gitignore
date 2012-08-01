@@ -3,3 +3,11 @@
 *.egg-info
 build
 dist
+lib
+include
+*~
+.Python
+bin/activate*
+bin/easy_install*
+bin/pip*
+bin/python*

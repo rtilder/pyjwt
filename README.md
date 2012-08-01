@@ -29,6 +29,9 @@ The JWT spec supports several algorithms for cryptographic signing. This library
 * HS256	- HMAC using SHA-256 hash algorithm (default)
 * HS384	- HMAC using SHA-384 hash algorithm
 * HS512 - HMAC using SHA-512 hash algorithm
+* RS256 - RSA using SHA-256 hash algorithm
+* RS384 - RSA using SHA-384 hash algorithm
+* RS512 - RSA using SHA-584 hash algorithm
 
 Change the algorithm with by setting it in encode:
 
