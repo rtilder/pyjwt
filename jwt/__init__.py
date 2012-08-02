@@ -41,7 +41,7 @@ verifying_methods = {
 }
 
 def equiv(a, b):
-    for x, y in zip(correctMac, sig_bytes):
+    for x, y in zip(a, b):
         result |= ord(x) ^ ord(y)
     return result == 0
 
