@@ -40,7 +40,11 @@ verifying_methods = {
     'none': lambda msg, key, sig: True
 }
 
+# Based on
+# http://rdist.root.org/2010/01/07/timing-independent-array-comparison/
 def equiv(a, b):
+    if len(a) != len(b):
+        return False
     result = 0
     for x, y in zip(a, b):
         result |= ord(x) ^ ord(y)
