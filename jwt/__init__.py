@@ -31,15 +31,19 @@ signing_methods = {
 }
 
 verifying_methods = {
-    'HS256': lambda msg, key, sig: sig == hmac.new(key, msg, hashlib.sha256).digest(),
-    'HS384': lambda msg, key, sig: sig == hmac.new(key, msg, hashlib.sha384).digest(),
-    'HS512': lambda msg, key, sig: sig == hmac.new(key, msg, hashlib.sha512).digest(),
+    'HS256': lambda msg, key, sig: equiv(sig, hmac.new(key, msg, hashlib.sha256).digest()),
+    'HS384': lambda msg, key, sig: equiv(sig, hmac.new(key, msg, hashlib.sha384).digest()),
+    'HS512': lambda msg, key, sig: equiv(sig, hmac.new(key, msg, hashlib.sha512).digest()),
     'RS256': lambda msg, key, sig: key.verify(hashlib.sha256(msg).digest(), sig, 'sha256'),
     'RS384': lambda msg, key, sig: key.verify(hashlib.sha384(msg).digest(), sig, 'sha384'),
     'RS512': lambda msg, key, sig: key.verify(hashlib.sha512(msg).digest(), sig, 'sha512'),
     'none': lambda msg, key, sig: True
 }
 
+def equiv(a, b):
+    for x, y in zip(correctMac, sig_bytes):
+        result |= ord(x) ^ ord(y)
+    return result == 0
 
 def base64url_decode(input):
     input += '=' * (4 - (len(input) % 4))
