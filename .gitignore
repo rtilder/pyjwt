@@ -1,3 +1,4 @@
+.*.swp
 *.pyc
 **/*.pyc
 *.egg-info
