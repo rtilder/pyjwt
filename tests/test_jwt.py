@@ -81,6 +81,13 @@ class TestJWT(unittest.TestCase):
         assert jwt.check(jwt.encode(u"test", key, u'RS384'), key)
         assert jwt.check(jwt.encode(u"test", key, u'RS512'), key)
 
+    def test_encode_none(self):
+        secret = 'secret'
+        jwt_message = jwt.encode(self.payload, secret, algorithm="none")
+        self.assertEqual(jwt_message[-1], '.')
+        decoded_payload = jwt.decode(jwt_message, secret)
+        self.assertEqual(decoded_payload, self.payload)
+    
 
 if __name__ == '__main__':
     unittest.main()
