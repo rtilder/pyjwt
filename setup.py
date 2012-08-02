@@ -21,4 +21,5 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
+    install_requires=['M2Crypto'],
 )
