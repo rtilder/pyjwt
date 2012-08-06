@@ -13,7 +13,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
-    
+
 __all__ = ['encode', 'decode', 'rsa_load', 'check', 'DecodeError']
 
 log = logging.getLogger(__name__)
@@ -64,9 +64,15 @@ def header(jwt):
     except (ValueError, TypeError):
         raise DecodeError("Invalid header encoding")
 
-def encode(payload, key, algorithm='HS256'):
+def encode(payload, key, algorithm='HS256', header=None):
     segments = []
-    header = {"typ": "JWT", "alg": algorithm}
+    if header is None:
+        header = {"typ": "JWT", "alg": algorithm}
+    else:
+        if not header.has_key('typ'):
+            raise EncodeError('Missing "typ" header in custom headers')
+        if not header.has_key('alg'):
+            header['alg'] = algorithm
     segments.append(base64url_encode(json.dumps(header)))
     segments.append(base64url_encode(json.dumps(payload)))
     signing_input = '.'.join(segments)

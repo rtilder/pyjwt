@@ -88,6 +88,15 @@ class TestJWT(unittest.TestCase):
         decoded_payload = jwt.decode(jwt_message, secret)
         self.assertEqual(decoded_payload, self.payload)
 
+    def test_encode_with_header(self):
+        secret = 'secret'
+        alg = 'HS256'
+        header = {'typ': 'urn:ietf:params:oauth:token-type:jwt', 'alg': alg}
+        jwt_message = jwt.encode(self.payload, secret, algorithm=alg,
+                                 header=header)
+        decoded_payload = jwt.decode(jwt_message, secret)
+        self.assertEqual(jwt.header(jwt_message), header)
+        self.assertEqual(decoded_payload, self.payload)
 
 if __name__ == '__main__':
     unittest.main()
