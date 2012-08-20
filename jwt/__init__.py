@@ -19,6 +19,7 @@ __all__ = ['encode', 'decode', 'rsa_load', 'check', 'DecodeError']
 log = logging.getLogger(__name__)
 
 class DecodeError(Exception): pass
+class EncodeError(Exception): pass
 
 signing_methods = {
     'HS256': lambda msg, key: hmac.new(key, msg, hashlib.sha256).digest(),
