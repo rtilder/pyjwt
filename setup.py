@@ -4,15 +4,18 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
+# Forked from the original. Hopefully we can merge this all back and
+# delete this fork. You should consider this package temporary.
 setup(
-    name = "PyJWT",
-    version = "0.1.4",
-    author = "Jeff Lindsay",
-    author_email = "jeff.lindsay@twilio.com",
-    description = ("JSON Web Token implemtnation in Python"),
+    name = "PyJWT-mozilla",
+    version = "0.1.4.1",
+    author = "Jeff Lindsay, Ryan Tilder",
+    author_email = "rtilder@mozilla.com",
+    description = ("JSON Web Token implementation in Python"),
     license = "MIT",
     keywords = "jwt json web token security signing",
-    url = "http://github.com/progrium/pyjwt",
+    url = "http://github.com/rtilder/pyjwt",
     packages=['jwt'],
     scripts=['bin/jwt'],
     long_description=read('README.md'),
