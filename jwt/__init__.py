@@ -65,7 +65,7 @@ def header(jwt):
     except (ValueError, TypeError):
         raise DecodeError("Invalid header encoding")
 
-def encode(payload, key, algorithm='HS256', header=None):
+def encode(payload, key, algorithm='HS256', header=None, encoder=None):
     segments = []
     if header is None:
         header = {"typ": "JWT", "alg": algorithm}
@@ -75,7 +75,8 @@ def encode(payload, key, algorithm='HS256', header=None):
         if not header.has_key('alg'):
             header['alg'] = algorithm
     segments.append(base64url_encode(json.dumps(header)))
-    segments.append(base64url_encode(json.dumps(payload)))
+    # Allow custom JSON encodings.
+    segments.append(base64url_encode(json.dumps(payload, cls=encoder)))
     signing_input = '.'.join(segments)
     try:
         if isinstance(key, unicode):
