@@ -1,11 +1,31 @@
-PyJWT
-=====
+PyJWT-mozilla
+=============
+
 A Python implementation of [JSON Web Token draft 01](http://self-issued.info/docs/draft-jones-json-web-token-01.html).
+
+This is Mozilla's fork of [PyJWT](http://pypi.python.org/pypi/PyJWT)
+which adds RSA algorithms, fixes some timing
+attacks, and makes a few other adjustments. It is used in projects such as
+[webpay](https://github.com/mozilla/webpay).
 
 Installing
 ----------
 
-    sudo easy_install PyJWT
+Install the module with [pip](http://www.pip-installer.org/) or something similar:
+
+    pip install PyJWT-mozilla
+
+This install step will also install/compile
+[M2Crypto](http://pypi.python.org/pypi/M2Crypto)
+so you will need `swig` for this. You can get it with a package manager like:
+
+    brew install swig
+
+Alternatively you can probably find a binary package for M2Crypto with
+something like this:
+
+   sudo apt-get install python-m2crypto
+
 
 Usage
 -----
@@ -40,7 +60,12 @@ Change the algorithm with by setting it in encode:
 Tests
 -----
 
-You can run tests from the project root after installed with:
+Install the project in a [virtualenv](http://pypi.python.org/pypi/virtualenv)
+(or wherever) by typing this from the root:
+
+    python setup.py develop
+
+Run the tests like this:
 
     python tests/test_jwt.py
 
