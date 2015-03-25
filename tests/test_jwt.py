@@ -10,7 +10,7 @@ class TestJWT(unittest.TestCase):
     def setUp(self):
         self.payload = {"iss": "jeff", "exp": int(time.time()), "claim": "insanity"}
         # Start with a clean slate after each test
-        self.addCleanup(jwt.set_allowed_algos, *jwt.SUPPORTED_ALGOS)
+        self.addCleanup(jwt.set_algorithms, *jwt.SUPPORTED_ALGOS)
 
     def test_encode_decode(self):
         secret = 'secret'
@@ -115,13 +115,13 @@ class TestJWT(unittest.TestCase):
         # allowed_algos parameter
         jwt_message = jwt.encode(self.payload, secret, algorithm="HS256")
         decoded_payload = jwt.decode(jwt_message, secret, verify=True,
-                                     allowed_algos=("HS256",))
+                                     algorithms=("HS256",))
         self.assertEqual(decoded_payload, self.payload)
         #
-        self.assertRaises(ValueError, jwt.set_allowed_algos, 'HS256',
+        self.assertRaises(ValueError, jwt.set_algorithms, 'HS256',
                           'banana')
         #
-        jwt.set_allowed_algos('HS256', 'RS256')
+        jwt.set_algorithms('HS256', 'RS256')
         jwt_message = jwt.encode(self.payload, secret, algorithm="HS256")
         decoded_payload = jwt.decode(jwt_message, secret, verify=False)
         self.assertEqual(decoded_payload, self.payload)

@@ -102,12 +102,12 @@ def encode(payload, key, algorithm='HS256', header=None, encoder=None):
     segments.append(base64url_encode(signature))
     return '.'.join(segments)
 
-def decode(jwt, key='', verify=True, allowed_algos=None):
-    if allowed_algos is not None:
-        if type(allowed_algos) not in (list, tuple):
-            raise ValueError("allowed_algos must be a list or tuple")
+def decode(jwt, key='', verify=True, algorithms=None):
+    if algorithms is not None:
+        if type(algorithms) not in (list, tuple):
+            raise ValueError("algorithms must be a list or tuple")
     else:
-        allowed_algos = ALLOWED_ALGOS
+        algorithms = ALLOWED_ALGOS
     try:
         signing_input, crypto_segment = jwt.rsplit('.', 1)
         header_segment, payload_segment = signing_input.split('.', 1)
@@ -122,7 +122,7 @@ def decode(jwt, key='', verify=True, allowed_algos=None):
         log.debug('Could not decode a segment', exc_info=True)
         raise DecodeError("Invalid segment encoding")
     if verify:
-        if header['alg'] not in allowed_algos:
+        if header['alg'] not in algorithms:
             raise DecodeError("Algorithm not allowed")
         try:
             if isinstance(key, unicode):
@@ -148,7 +148,7 @@ def rsa_load_pub(filename):
     """Read a PEM-encoded RSA pubkey from a file."""
     return M2Crypto.RSA.load_pub_key(filename)
 
-def set_allowed_algos(*args):
+def set_algorithms(*args):
     global ALLOWED_ALGOS
 
     old = tuple(ALLOWED_ALGOS)
