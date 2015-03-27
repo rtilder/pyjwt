@@ -1,3 +1,4 @@
+import base64
 import os
 import unittest
 import time
@@ -8,6 +9,8 @@ class TestJWT(unittest.TestCase):
 
     def setUp(self):
         self.payload = {"iss": "jeff", "exp": int(time.time()), "claim": "insanity"}
+        # Start with a clean slate after each test
+        self.addCleanup(jwt.set_algorithms, *jwt.SUPPORTED_ALGOS)
 
     def test_encode_decode(self):
         secret = 'secret'
@@ -85,8 +88,15 @@ class TestJWT(unittest.TestCase):
         secret = 'secret'
         jwt_message = jwt.encode(self.payload, secret, algorithm="none")
         self.assertEqual(jwt_message[-1], '.')
-        decoded_payload = jwt.decode(jwt_message, secret)
+        decoded_payload = jwt.decode(jwt_message, secret, verify=False)
         self.assertEqual(decoded_payload, self.payload)
+        # Verification should succeed if there is no signature
+        decoded_payload = jwt.decode(jwt_message, secret, verify=True)
+        self.assertEqual(decoded_payload, self.payload)
+        # But it should fail if the signature is invalid
+        jwt_message += base64.b64encode('invalid signature')
+        self.assertRaises(jwt.DecodeError, jwt.decode, jwt_message, secret,
+                          verify=True)
 
     def test_encode_with_header(self):
         secret = 'secret'
@@ -97,6 +107,29 @@ class TestJWT(unittest.TestCase):
         decoded_payload = jwt.decode(jwt_message, secret)
         self.assertEqual(jwt.header(jwt_message), header)
         self.assertEqual(decoded_payload, self.payload)
+
+    def test_allowed_algos(self):
+        secret = 'secret'
+        alg = 'HS256'
+        header = {'typ': 'urn:ietf:params:oauth:token-type:jwt', 'alg': alg}
+        # allowed_algos parameter
+        jwt_message = jwt.encode(self.payload, secret, algorithm="HS256")
+        decoded_payload = jwt.decode(jwt_message, secret, verify=True,
+                                     algorithms=("HS256",))
+        self.assertEqual(decoded_payload, self.payload)
+        #
+        self.assertRaises(ValueError, jwt.set_algorithms, 'HS256',
+                          'banana')
+        #
+        jwt.set_algorithms('HS256', 'RS256')
+        jwt_message = jwt.encode(self.payload, secret, algorithm="HS256")
+        decoded_payload = jwt.decode(jwt_message, secret, verify=False)
+        self.assertEqual(decoded_payload, self.payload)
+        # Disallowed algo
+        jwt_message = jwt.encode(self.payload, secret, algorithm="none")
+        self.assertRaises(jwt.DecodeError, jwt.decode, jwt_message, secret,
+                          verify=True)
+
 
 if __name__ == '__main__':
     unittest.main()
