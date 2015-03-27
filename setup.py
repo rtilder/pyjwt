@@ -9,7 +9,7 @@ def read(fname):
 # delete this fork. You should consider this package temporary.
 setup(
     name = "PyJWT-mozilla",
-    version = "0.1.4.2",
+    version = "0.1.5",
     author = "Jeff Lindsay, Ryan Tilder",
     author_email = "rtilder@mozilla.com",
     description = ("JSON Web Token implementation in Python"),
